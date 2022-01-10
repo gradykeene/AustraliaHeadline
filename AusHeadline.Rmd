@@ -1,0 +1,506 @@
+---
+title: "Australia ABC Headlines Analysis"
+author: "Grady Keene"
+---
+
+```{r}
+#Appropriate libraries
+library(tidytext)
+library(stringr)
+library(broom)
+library(scales)
+library(lubridate)
+library(tidyverse)
+library(SnowballC)
+library(ggplot2)
+library(purrr)
+library(dplyr)
+library(tidyr)
+library(igraph)
+library(ggraph)
+library(widyr)
+library(gridExtra)
+library(gtable)
+library(data.table)
+library(plotly)
+
+system("ls ../input")
+```
+
+```{r}
+#Read raw data
+library(readr)
+abc <- read_csv("https://raw.githubusercontent.com/franciscadias/data/master/abcnews-date-text.csv")
+View(abcnews_date_text)
+```
+
+```{r}
+#remove punctuation
+abc$headline_text <- gsub(pattern="'",replacement =" ",abc$headline_text,fixed = TRUE)
+abc$headline_text <- gsub(pattern=":",replacement =" ",abc$headline_text,fixed = TRUE)
+abc$headline_text <- gsub(pattern=";",replacement =" ",abc$headline_text,fixed = TRUE)
+abc$headline_text <- gsub(pattern="$",replacement =" ",abc$headline_text,fixed = TRUE)
+
+```
+
+
+```{r}
+#normalise and trim
+abc$headline_text <- gsub(pattern="\\s+", replacement =" ", abc$headline_text, fixed = FALSE)
+abc$headline_text <- str_trim(abc$headline_text, side = "both")
+```
+
+```{r}
+#epoch day sequence
+#J2000 ; 20000101 = day 0
+date_sect <- unique(abc$publish_date)
+date_fact <- seq(as.Date("2000-01-02"), as.Date("2020-12-31"), "day")
+date_fact <- as.integer(format(date_fact, "%Y%m%d"))
+
+```
+
+```{r}
+#Date
+abc$Date <- as.Date(substr(abc$publish_date,1,8), format="%Y%m%d")
+```
+
+```{r}
+#Select relevant variables
+abc %>%
+  dplyr::select(headline_text, Date)
+```
+
+```{r}
+#Separate years into quarters and count city name Brisbane in headlines from 2005-2015
+#2005
+abc %>%
+  filter(Date >= "2005-01-01") %>%
+  filter(Date <= "2005-03-30") %>%
+  filter(grepl("brisbane", headline_text)) %>%
+  nrow()
+
+abc %>%
+  filter(Date >= "2005-04-01") %>%
+  filter(Date <= "2005-06-30") %>%
+  filter(grepl("brisbane", headline_text)) %>%
+  nrow()
+
+abc %>%
+  filter(Date >= "2005-07-01") %>%
+  filter(Date <= "2005-09-30") %>%
+  filter(grepl("brisbane", headline_text)) %>%
+  nrow()
+
+abc %>%
+  filter(Date >= "2005-10-01") %>%
+  filter(Date <= "2005-12-30") %>%
+  filter(grepl("brisbane", headline_text)) %>%
+  nrow()
+```
+
+```{r}
+#2006
+abc %>%
+  filter(Date >= "2006-01-01") %>%
+  filter(Date <= "2006-03-30") %>%
+  filter(grepl("brisbane", headline_text)) %>%
+  nrow()
+
+abc %>%
+  filter(Date >= "2006-04-01") %>%
+  filter(Date <= "2006-06-30") %>%
+  filter(grepl("brisbane", headline_text)) %>%
+  nrow()
+
+abc %>%
+  filter(Date >= "2006-07-01") %>%
+  filter(Date <= "2006-09-30") %>%
+  filter(grepl("brisbane", headline_text)) %>%
+  nrow()
+
+abc %>%
+  filter(Date >= "2006-10-01") %>%
+  filter(Date <= "2006-12-30") %>%
+  filter(grepl("brisbane", headline_text)) %>%
+  nrow()
+```
+
+```{r}
+#2007
+abc %>%
+  filter(Date >= "2007-01-01") %>%
+  filter(Date <= "2007-03-30") %>%
+  filter(grepl("brisbane", headline_text)) %>%
+  nrow()
+
+abc %>%
+  filter(Date >= "2007-04-01") %>%
+  filter(Date <= "2007-06-30") %>%
+  filter(grepl("brisbane", headline_text)) %>%
+  nrow()
+
+abc %>%
+  filter(Date >= "2007-07-01") %>%
+  filter(Date <= "2007-09-30") %>%
+  filter(grepl("brisbane", headline_text)) %>%
+  nrow()
+
+abc %>%
+  filter(Date >= "2007-10-01") %>%
+  filter(Date <= "2007-12-30") %>%
+  filter(grepl("brisbane", headline_text)) %>%
+  nrow()
+```
+
+```{r}
+#2008
+abc %>%
+  filter(Date >= "2008-01-01") %>%
+  filter(Date <= "2008-03-30") %>%
+  filter(grepl("brisbane", headline_text)) %>%
+  nrow()
+
+abc %>%
+  filter(Date >= "2008-04-01") %>%
+  filter(Date <= "2008-06-30") %>%
+  filter(grepl("brisbane", headline_text)) %>%
+  nrow()
+
+abc %>%
+  filter(Date >= "2008-07-01") %>%
+  filter(Date <= "2008-09-30") %>%
+  filter(grepl("brisbane", headline_text)) %>%
+  nrow()
+
+abc %>%
+  filter(Date >= "2008-10-01") %>%
+  filter(Date <= "2008-12-30") %>%
+  filter(grepl("brisbane", headline_text)) %>%
+  nrow()
+```
+
+```{r}
+#2009
+abc %>%
+  filter(Date >= "2009-01-01") %>%
+  filter(Date <= "2009-03-30") %>%
+  filter(grepl("brisbane", headline_text)) %>%
+  nrow()
+
+abc %>%
+  filter(Date >= "2009-04-01") %>%
+  filter(Date <= "2009-06-30") %>%
+  filter(grepl("brisbane", headline_text)) %>%
+  nrow()
+
+abc %>%
+  filter(Date >= "2009-07-01") %>%
+  filter(Date <= "2009-09-30") %>%
+  filter(grepl("brisbane", headline_text)) %>%
+  nrow()
+
+abc %>%
+  filter(Date >= "2009-10-01") %>%
+  filter(Date <= "2009-12-30") %>%
+  filter(grepl("brisbane", headline_text)) %>%
+  nrow()
+```
+
+```{r}
+#2010
+abc %>%
+  filter(Date >= "2010-01-01") %>%
+  filter(Date <= "2010-03-30") %>%
+  filter(grepl("brisbane", headline_text)) %>%
+  nrow()
+
+abc %>%
+  filter(Date >= "2010-04-01") %>%
+  filter(Date <= "2010-06-30") %>%
+  filter(grepl("brisbane", headline_text)) %>%
+  nrow()
+
+abc %>%
+  filter(Date >= "2010-07-01") %>%
+  filter(Date <= "2010-09-30") %>%
+  filter(grepl("brisbane", headline_text)) %>%
+  nrow()
+
+abc %>%
+  filter(Date >= "2010-10-01") %>%
+  filter(Date <= "2010-12-30") %>%
+  filter(grepl("brisbane", headline_text)) %>%
+  nrow()
+```
+
+```{r}
+#2011
+abc %>%
+  filter(Date >= "2011-01-01") %>%
+  filter(Date <= "2011-03-30") %>%
+  filter(grepl("brisbane", headline_text)) %>%
+  nrow()
+
+abc %>%
+  filter(Date >= "2011-04-01") %>%
+  filter(Date <= "2011-06-30") %>%
+  filter(grepl("brisbane", headline_text)) %>%
+  nrow()
+
+abc %>%
+  filter(Date >= "2011-07-01") %>%
+  filter(Date <= "2011-09-30") %>%
+  filter(grepl("brisbane", headline_text)) %>%
+  nrow()
+
+abc %>%
+  filter(Date >= "2011-10-01") %>%
+  filter(Date <= "2011-12-30") %>%
+  filter(grepl("brisbane", headline_text)) %>%
+  nrow()
+```
+
+```{r}
+#2012
+abc %>%
+  filter(Date >= "2012-01-01") %>%
+  filter(Date <= "2012-03-30") %>%
+  filter(grepl("brisbane", headline_text)) %>%
+  nrow()
+
+abc %>%
+  filter(Date >= "2012-04-01") %>%
+  filter(Date <= "2012-06-30") %>%
+  filter(grepl("brisbane", headline_text)) %>%
+  nrow()
+
+abc %>%
+  filter(Date >= "2012-07-01") %>%
+  filter(Date <= "2012-09-30") %>%
+  filter(grepl("brisbane", headline_text)) %>%
+  nrow()
+
+abc %>%
+  filter(Date >= "2012-10-01") %>%
+  filter(Date <= "2012-12-30") %>%
+  filter(grepl("brisbane", headline_text)) %>%
+  nrow()
+```
+
+```{r}
+#2013
+abc %>%
+  filter(Date >= "2013-01-01") %>%
+  filter(Date <= "2013-03-30") %>%
+  filter(grepl("brisbane", headline_text)) %>%
+  nrow()
+
+abc %>%
+  filter(Date >= "2013-04-01") %>%
+  filter(Date <= "2013-06-30") %>%
+  filter(grepl("brisbane", headline_text)) %>%
+  nrow()
+
+abc %>%
+  filter(Date >= "2013-07-01") %>%
+  filter(Date <= "2013-09-30") %>%
+  filter(grepl("brisbane", headline_text)) %>%
+  nrow()
+
+abc %>%
+  filter(Date >= "2013-10-01") %>%
+  filter(Date <= "2013-12-30") %>%
+  filter(grepl("brisbane", headline_text)) %>%
+  nrow()
+```
+
+```{r}
+#2014
+abc %>%
+  filter(Date >= "2014-01-01") %>%
+  filter(Date <= "2014-03-30") %>%
+  filter(grepl("brisbane", headline_text)) %>%
+  nrow()
+
+abc %>%
+  filter(Date >= "2014-04-01") %>%
+  filter(Date <= "2014-06-30") %>%
+  filter(grepl("brisbane", headline_text)) %>%
+  nrow()
+
+abc %>%
+  filter(Date >= "2014-07-01") %>%
+  filter(Date <= "2014-09-30") %>%
+  filter(grepl("brisbane", headline_text)) %>%
+  nrow()
+
+abc %>%
+  filter(Date >= "2014-10-01") %>%
+  filter(Date <= "2014-12-30") %>%
+  filter(grepl("brisbane", headline_text)) %>%
+  nrow()
+```
+
+```{r}
+#2015
+abc %>%
+  filter(Date >= "2015-01-01") %>%
+  filter(Date <= "2015-03-30") %>%
+  filter(grepl("brisbane", headline_text)) %>%
+  nrow()
+
+abc %>%
+  filter(Date >= "2015-04-01") %>%
+  filter(Date <= "2015-06-30") %>%
+  filter(grepl("brisbane", headline_text)) %>%
+  nrow()
+
+abc %>%
+  filter(Date >= "2015-07-01") %>%
+  filter(Date <= "2015-09-30") %>%
+  filter(grepl("brisbane", headline_text)) %>%
+  nrow()
+
+abc %>%
+  filter(Date >= "2015-10-01") %>%
+  filter(Date <= "2015-12-30") %>%
+  filter(grepl("brisbane", headline_text)) %>%
+  nrow()
+```
+
+```{r}
+#Import combined word frequency and CPI data for Brisbane
+library(readxl)
+Brisbane_word <- read_excel("~/Brisbane_word.xlsx")
+View(Brisbane_word)
+```
+
+```{r}
+#Create change in Brisbane CPI by quarter-year
+Brisbane_word %>%
+  mutate(CPI_change = CPI-lag(CPI, default = first(CPI))) -> Brisbane_CPI
+```
+
+```{r}
+#Summary statistics
+summary(Brisbane_CPI$brisbane_frequency)
+sd(Brisbane_CPI$brisbane_frequency)
+
+summary(Brisbane_CPI$CPI)
+sd(Brisbane_CPI$CPI)
+
+summary(Brisbane_CPI$CPI_change)
+sd(Brisbane_CPI$CPI_change)
+
+```
+
+```{r}
+#Data diagnostics
+library(MASS)
+
+hist(Brisbane_CPI$brisbane_frequency)
+hist(Brisbane_CPI$CPI_change)
+
+model <- lm(CPI ~ brisbane_frequency, data = Brisbane_CPI)
+
+Stud_resid <- studres(model)
+
+Leverage_h <- hatvalues(model)
+
+Bris_measure <- data_frame(Stud_resid, Leverage_h)
+
+head(Bris_measure)
+#No observations too influential
+```
+
+```{r}
+#Visualization between variables
+ggplot(Brisbane_CPI, aes(x = time, y = brisbane_frequency)) +
+  geom_point() +
+  geom_line() +
+  xlab("Time in Yearly Quarter") +
+  ylab("Brisbane Mention Frequency") +
+  theme_bw()
+
+ggplot(Brisbane_CPI, aes(x = time, y = CPI_change)) +
+  geom_point() +
+  geom_line() +
+  xlab("Time in Yearly Quarter") +
+  ylab("Change in CPI") +
+  theme_bw()
+
+ggplot(Brisbane_CPI, aes(x = brisbane_frequency, y = CPI_change)) +
+  geom_point() +
+  geom_line() +
+  xlab("Brisbane Mention Frequency") +
+  ylab("Change in CPI") +
+  theme_bw()
+
+ggplot(Brisbane_CPI, aes(x = brisbane_frequency, y = CPI)) +
+  geom_point() +
+  geom_line() +
+  xlab("Brisbane Mention Frequency") +
+  ylab("Quarterly CPI") +
+  theme_bw()
+```
+
+```{r}
+#Exploratory analysis
+summary(lm(CPI_change ~ log(brisbane_frequency), data = Brisbane_CPI))
+
+ggplot(Brisbane_CPI, aes(x = brisbane_frequency, y = CPI_change)) +
+  geom_smooth(se = F) +
+  xlab("Brisbane Mention Frequency") +
+  ylab("Change in CPI") +
+  theme_bw()
+
+```
+
+```{r}
+#Data modeling and visualization 
+summary(lm(CPI ~ brisbane_frequency, data = Brisbane_CPI))
+
+ggplot(Brisbane_CPI, aes(x = brisbane_frequency, y = CPI)) +
+  geom_smooth(method = lm, se = F) +
+  geom_point() +
+  xlab("Brisbane Mention Frequency") +
+  ylab("Consumer Price Index") +
+  theme_bw()
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
